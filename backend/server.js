@@ -44,7 +44,8 @@
 //   })
 // })
 
-
+const mongoose = require('mongoose');
+require('dotenv').config();
 const http = require('http');
 const express = require('express');
 const fs = require('fs/promises');
@@ -52,6 +53,13 @@ const { Server: SocketServer } = require('socket.io');
 const path = require('path');
 const cors = require('cors');
 const pty = require('node-pty');
+
+const mongoURI = process.env.MONGO_URI ;
+
+mongoose.connect(mongoURI)
+  .then(() => console.log(`Connected to MongoDB ${mongoURI}`))
+  .catch((err) => console.error('Error connecting to MongoDB:', err));
+
 
 // Create a terminal process
 const ptyProcess = pty.spawn(process.platform === 'win32' ? 'cmd.exe' : 'bash', [], {
