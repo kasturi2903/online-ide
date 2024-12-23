@@ -43,7 +43,7 @@ const Home = () => {
                 </a>
               </li>
               <li className="nav-item">
-                <a className="nav-link btn btn-primary text-white ms-2" href="/editor">
+                <a className="nav-link btn btn-primary text-white ms-2" href="/temp">
                   Get Started
                 </a>
               </li>
@@ -59,7 +59,7 @@ const Home = () => {
           <p className="lead">
             Build and run code securely in multiple languages with Docker-powered containers.
           </p>
-          <a href="/editor" className="btn btn-light btn-lg">
+          <a href="/temp" className="btn btn-light btn-lg">
             Start Coding
           </a>
         </div>
