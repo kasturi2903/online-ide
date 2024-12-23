@@ -1,0 +1,58 @@
+/* Base styles for the file tree */
+.file-tree {
+    font-family: 'Courier New', monospace;
+    font-size: 14px;
+    color: #d4d4d4;
+    padding: 10px;
+    background-color: #2d2d2d;
+    border-radius: 8px;
+    width: 250px;
+    overflow: auto;
+  }
+  
+  /* Styles for each file and folder */
+  .file-node {
+    cursor: pointer;
+    padding: 2px 5px;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+  }
+  
+  .file-node:hover {
+    background-color: #1e1e1e;
+  }
+  
+  /* Folder-specific styles */
+  .file-node.folder {
+    font-weight: bold;
+    color: #569cd6;
+  }
+  
+  .file-node.file {
+    color: #9cdcfe;
+  }
+  
+  /* Add spacing for nested folders */
+  ul {
+    list-style-type: none;
+    padding-left: 20px;
+    margin: 0;
+  }
+  
+  /* Apply a little styling for each item */
+  li {
+    padding: 5px 0;
+    margin: 0;
+  }
+  
+  /* Optional: Add expand/collapse icons */
+  .folder::before {
+    content: '\25B6'; /* Right arrow */
+    margin-right: 5px;
+    color: #9cdcfe;
+  }
+  
+  .folder.open::before {
+    content: '\25BC'; /* Down arrow */
+  }
+  

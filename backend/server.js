@@ -1,6 +1,6 @@
 // require('dotenv').config();
 // const mongoose = require('mongoose');
-// const express = require('express');
+// const express = require('express ');
 // const http =require('http')
 // const {Server:SocketServer}=require('socket.io')
 // const Grid = require('gridfs-stream')
@@ -53,6 +53,8 @@ const { Server: SocketServer } = require('socket.io');
 const path = require('path');
 const cors = require('cors');
 const pty = require('node-pty');
+const { stat } = require('fs');
+
 
 const mongoURI = process.env.MONGO_URI ;
 
@@ -115,7 +117,35 @@ io.on('connection', (socket) => {
     });
 });
 
+app.get('/files', async (req, res) => {
+  const fileTree = await generateFileTree('./user');
+  return res.json({ tree: fileTree })
+})
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
 });
+
+
+async function generateFileTree(directory) {
+  const tree = {}
+
+  async function buildTree(currentDir, currentTree) {
+      const files = await fs.readdir(currentDir)
+
+      for (const file of files) {
+          const filePath = path.join(currentDir, file)
+          const stat = await fs.stat(filePath)
+
+          if (stat.isDirectory()) {
+              currentTree[file] = {}
+              await buildTree(filePath, currentTree[file])
+          } else {
+              currentTree[file] = null
+          }
+      }
+  }
+
+  await buildTree(directory, tree);
+  return tree
+}
