@@ -100,6 +100,8 @@ io.on('connection', (socket) => {
     // Notify client to refresh files
     socket.emit('file:refresh');
 
+    
+
     // Handle file change event
     socket.on('file:change', async ({ path: filePath, content }) => {
         try {
@@ -111,6 +113,28 @@ io.on('connection', (socket) => {
             socket.emit('file:error', { message: `Failed to write file: ${error.message}` });
         }
     });
+
+    // socket.on('file:change', async ({ path, content }) => {
+    //     await fs.writeFile(`./user${path}`, content);
+    // })
+    socket.on('file:change', async ({ path: filePath, content }) => {
+        try {
+            // Ensure the file path is resolved relative to the `./user` directory
+            const resolvedPath = path.resolve('./user', filePath);
+    
+            // Validate that the resolved path is within `./user`
+            if (!resolvedPath.startsWith(path.resolve('./user'))) {
+                throw new Error('Invalid file path');
+            }
+    
+            await fs.writeFile(resolvedPath, content);
+            console.log(`File updated successfully: ${resolvedPath}`);
+        } catch (error) {
+            console.error(`Error updating file:`, error.message);
+            socket.emit('file:error', { message: `Failed to write file: ${error.message}` });
+        }
+    });
+    
 
     // Handle terminal write event
     socket.on('terminal:write', (data) => {
@@ -125,6 +149,47 @@ app.get('/files', async (req, res) => {
   const fileTree = await generateFileTree('./user');
   return res.json({ tree: fileTree })
 })
+
+// app.get('/files/content', async (req, res) => {
+//     const path = req.query.path;
+//     const content = await fs.readFile(`./user${path}`, 'utf-8');
+//     return res.json({ content });
+// })
+app.get('/files/content', async (req, res) => {
+    const filePath = req.query.path;
+
+    // Validate that path is provided
+    if (!filePath) {
+        return res.status(400).json({ error: "Path query parameter is required." });
+    }
+
+    try {
+        // Resolve the file path relative to the `./user` directory
+        const resolvedPath = path.resolve('./user', filePath);
+
+        // Ensure the resolved path is within the `./user` directory
+        if (!resolvedPath.startsWith(path.resolve('./user'))) {
+            return res.status(400).json({ error: "Invalid file path." });
+        }
+
+        // Read the file content
+        const content = await fs.readFile(resolvedPath, 'utf-8');
+        console.log(`File content read successfully: ${resolvedPath}`);
+        return res.json({ content });
+    } catch (error) {
+        console.error("Error reading file:", error.message);
+
+        // Handle file not found
+        if (error.code === 'ENOENT') {
+            return res.status(404).json({ error: "File not found." });
+        }
+
+        // Handle other errors
+        return res.status(500).json({ error: "Failed to read file content." });
+    }
+});
+
+
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
