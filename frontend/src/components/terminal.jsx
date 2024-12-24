@@ -70,6 +70,11 @@ const TerminalComponent = () => {
       term.write(data); // Write the data received from the server to the terminal
     });
 
+    socket.current.on('terminal:data', (data) => {
+      const terminal = document.getElementById('terminal'); // Replace with your terminal element
+      terminal.innerHTML += data; // Append data to terminal
+    });
+
     // Handle input from the terminal
     term.onData((data) => {
       if (data === '\r') { // Enter key pressed

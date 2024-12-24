@@ -93,6 +93,10 @@ ptyProcess.onData((data) => {
 io.on('connection', (socket) => {
     console.log(`Socket connected`, socket.id);
 
+    // Emit the current working directory to the client when they connect
+    const currentDir = `${path.resolve('./user')}> `;
+    socket.emit('terminal:data', currentDir); // Send the directory prompt to the client
+
     // Notify client to refresh files
     socket.emit('file:refresh');
 
