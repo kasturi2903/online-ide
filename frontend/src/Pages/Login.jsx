@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Form, Button, Container, Row, Col } from 'react-bootstrap';
+import { Form, Button, Container, Row, Col, Alert } from 'react-bootstrap';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
@@ -18,23 +18,27 @@ const Login = () => {
       ...formData,
       [name]: value
     });
+    setError(''); // Clear error message on input change
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
-      const response = await axios.post('http://localhost:5000/login', formData);
-      console.log('Login successful', response);
+      // Send login request to the API
+      const response = await axios.post('http://localhost:5000/user/login', formData);
+      console.log('Form data being sent:', formData);
+      console.log('Login successful:', response);
 
-      // Save the JWT token to localStorage
+      // Save JWT token and username to localStorage
       localStorage.setItem('token', response.data.token);
+      localStorage.setItem('username', formData.username);
 
-      // Redirect to profile or dashboard page
-      navigate('/profile');
+      // Redirect to the profile or dashboard page
+      navigate('/temp');
     } catch (err) {
       setError('Invalid username or password');
-      console.error('Login error', err);
+      console.error('Login error:', err);
     }
   };
 
@@ -43,9 +47,9 @@ const Login = () => {
       <Row className="justify-content-md-center">
         <Col md={6}>
           <h2 className="text-center mt-5">Login</h2>
-          <Form onSubmit={handleSubmit} className="mt-4">
-            {error && <div className="alert alert-danger">{error}</div>}
-            <Form.Group controlId="formUsername">
+          <Form onSubmit={handleSubmit} className="mt-4 shadow p-4 bg-light rounded">
+            {error && <Alert variant="danger">{error}</Alert>}
+            <Form.Group controlId="formUsername" className="mb-3">
               <Form.Label>Username</Form.Label>
               <Form.Control
                 type="text"
@@ -56,7 +60,7 @@ const Login = () => {
               />
             </Form.Group>
 
-            <Form.Group controlId="formPassword">
+            <Form.Group controlId="formPassword" className="mb-3">
               <Form.Label>Password</Form.Label>
               <Form.Control
                 type="password"
@@ -67,10 +71,13 @@ const Login = () => {
               />
             </Form.Group>
 
-            <Button variant="primary" type="submit" className="btn-block">
+            <Button variant="primary" type="submit" className="w-100">
               Login
             </Button>
           </Form>
+          <p className="text-center mt-3">
+            Don't have an account? <a href="/signup">Sign up here</a>.
+          </p>
         </Col>
       </Row>
     </Container>
@@ -78,7 +85,6 @@ const Login = () => {
 };
 
 export default Login;
-
 
 
 

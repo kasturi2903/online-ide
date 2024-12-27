@@ -1,7 +1,1 @@
-hello welcome in editor
-hello yash
-
-
-
-hi laarn  hi hello hihihi
-hellogtjjh
+print("Hello, b updated")

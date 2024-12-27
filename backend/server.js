@@ -89,15 +89,58 @@ app.get('/current-username', (req, res) => {
         res.status(404).json({ message: 'No user is logged in' });
     }
 });
+let latestUser = null; // Variable to store the latest user
 
+app.get('/files', async (req, res) => {
+    const username = req.query.username; // Access the username from the query parameters
+    if (!username) {
+        return res.status(400).json({ error: 'Username is required' });
+    }
+    latestUser = username; // Store only the latest username
+   // console.log(`Latest user: ${latestUser}`); // Log the latest username
+    const userDirectory = path.join('./user', latestUser); // Use the latest username to locate the directory
+    const fileTree = await generateFileTree(userDirectory);
+    return res.json({ tree: fileTree });
+});
+
+
+setInterval(() => {
+    if (latestUser) {
+        console.log('Latest Active Username:', latestUser);
+    } else {
+        console.log('No active username.');
+    }
+}, 5000);
 // Create a terminal process
+
+
+
 const ptyProcess = pty.spawn(process.platform === 'win32' ? 'cmd.exe' : 'bash', [], {
     name: 'xterm-color',
     cols: 80,
     rows: 30,
+    //cwd: path.resolve(process.env.INIT_CWD || '.', 'user',latestUser), // Ensure the path resolves correctly
     cwd: path.resolve(process.env.INIT_CWD || '.', 'user'), // Ensure the path resolves correctly
+
     env: process.env
 });
+// const userDir = path.resolve(process.env.INIT_CWD || '.', 'user', latestUser);
+// fs.stat(userDir, (err, stats) => {
+//     if (err || !stats.isDirectory()) {
+//         console.error(`Directory ${userDir} does not exist or is not a directory`);
+//         return;
+//     }
+
+//     // Proceed with spawning the terminal
+//     const ptyProcess = pty.spawn(process.platform === 'win32' ? 'cmd.exe' : 'bash', [], {
+//         name: 'xterm-color',
+//         cols: 80,
+//         rows: 30,
+//         cwd: userDir,
+//         env: process.env
+//     });
+// });
+
 
 
 const server = http.createServer(app);
@@ -172,19 +215,68 @@ io.on('connection', (socket) => {
     });
 });
 
-app.get('/files', async (req, res) => {
-  const fileTree = await generateFileTree('./user');
-  return res.json({ tree: fileTree })
-})
-
-// app.get('/files/content', async (req, res) => {
-//     const path = req.query.path;
-//     const content = await fs.readFile(`./user${path}`, 'utf-8');
-//     return res.json({ content });
+// app.get('/files', async (req, res) => {
+//     // const username = req.headers['username']; // Access the username from the headers
+//     // console.log(username)
+//     // if (!username) {
+//     //   return res.status(400).json({ error: 'Username is required' });
+//     // }
+//   const fileTree = await generateFileTree('./user');
+//   return res.json({ tree: fileTree })
 // })
+// const userSessions = {};
+// app.get('/files', async (req, res) => {
+//     const username = req.query.username; // Access the username from the query parameters
+//    // console.log(username)
+//     if (!username) {
+//       return res.status(400).json({ error: 'Username is required' });
+//     }
+//     userSessions[username] = { lastAccessed: new Date() }; // Store user-specific data
+//     //console.log('Current User Sessions:', userSessions);
+
+//     const userDirectory = path.join('./user', username); // Use the username to locate the directory
+//     const fileTree = await generateFileTree(userDirectory);
+//     return res.json({ tree: fileTree });
+//   });
+//   setInterval(() => {
+//     const usernames = Object.keys(userSessions);
+//     if (usernames.length === 0) {
+//         console.log('No active usernames.');
+//     } else {
+//         console.log('Active Usernames:', usernames.join(', '));
+//     }
+// }, 5000);
+
+// // app.get('/files/content', async (req, res) => {
+// //     const path = req.query.path;
+// //     const content = await fs.readFile(`./user${path}`, 'utf-8');
+// //     return res.json({ content });
+// // })
+// let latestUser = null; // Variable to store the latest user
+
+// app.get('/files', async (req, res) => {
+//     const username = req.query.username; // Access the username from the query parameters
+//     if (!username) {
+//         return res.status(400).json({ error: 'Username is required' });
+//     }
+//     latestUser = username; // Store only the latest username
+//    // console.log(`Latest user: ${latestUser}`); // Log the latest username
+//     const userDirectory = path.join('./user', latestUser); // Use the latest username to locate the directory
+//     const fileTree = await generateFileTree(userDirectory);
+//     return res.json({ tree: fileTree });
+// });
+
+// // Periodically log the latest username
+// // setInterval(() => {
+// //     if (latestUser) {
+// //         console.log('Latest Active Username:', latestUser);
+// //     } else {
+// //         console.log('No active username.');
+// //     }
+// // }, 5000);
 app.get('/files/content', async (req, res) => {
     const filePath = req.query.path;
-
+    console.log(filePath)
     // Validate that path is provided
     if (!filePath) {
         return res.status(400).json({ error: "Path query parameter is required." });
@@ -193,7 +285,7 @@ app.get('/files/content', async (req, res) => {
     try {
         // Resolve the file path relative to the `./user` directory
         const resolvedPath = path.resolve('./user', filePath);
-
+        
         // Ensure the resolved path is within the `./user` directory
         if (!resolvedPath.startsWith(path.resolve('./user'))) {
             return res.status(400).json({ error: "Invalid file path." });

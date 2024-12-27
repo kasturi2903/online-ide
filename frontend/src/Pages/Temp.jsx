@@ -17,8 +17,13 @@ const Temp = () => {
   const [selectedFile, setSelectedFile] = useState("");
   const [selectedFileContents, setSelectedFileContents] = useState("");
   const [fileContents, setFileContents] = useState("");
-
+   const username = localStorage.getItem('username');
+  // console.log(username)
   // Determine if the file is saved
+  //console.log(selectedFile)
+  const filePath = `${username}/${selectedFile}`;
+   // Concatenate username and selected file with a '/'
+  // console.log(filePath)
   const isSaved = useMemo(
     () => selectedFileContents === fileContents,
     [selectedFileContents, fileContents]
@@ -28,8 +33,9 @@ const Temp = () => {
   const getFileContents = useCallback(async () => {
     if (!selectedFile) return;
     const response = await fetch(
-      `http://localhost:5000/files/content?path=${selectedFile}`
+      `http://localhost:5000/files/content?path=${filePath}`
     );
+    console.log(filePath)
     const result = await response.json();
     setSelectedFileContents(result.content);
   }, [selectedFile]);
@@ -64,10 +70,11 @@ const Temp = () => {
 
         // Emit changes to the server
         socket.emit("file:change", {
-          path: selectedFile,
+          path: filePath,
           content: fileContents,
         });
-
+       
+       const finalFile={}
         // Re-fetch updated file contents to synchronize state
         const response = await fetch(
           `http://localhost:5000/files/content?path=${selectedFile}`
