@@ -54,6 +54,10 @@ const path = require('path');
 const cors = require('cors');
 const pty = require('node-pty');
 const { stat } = require('fs');
+const app = express();
+
+const bodyParser = require('body-parser');
+app.use(bodyParser.json())
 
 
 const mongoURI = process.env.MONGO_URI ;
@@ -72,7 +76,7 @@ const ptyProcess = pty.spawn(process.platform === 'win32' ? 'cmd.exe' : 'bash', 
     env: process.env
 });
 
-const app = express();
+
 const server = http.createServer(app);
 const io = new SocketServer(server, {
     cors: {
@@ -189,13 +193,6 @@ app.get('/files/content', async (req, res) => {
     }
 });
 
-
-const PORT = process.env.PORT || 5000;
-server.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
-});
-
-
 async function generateFileTree(directory) {
   const tree = {}
 
@@ -218,3 +215,15 @@ async function generateFileTree(directory) {
   await buildTree(directory, tree);
   return tree
 }
+
+//Import the router file
+const userRoutes = require('./routes/user.routes');
+
+//Use the router
+app.use('/user', userRoutes);
+
+const PORT = process.env.PORT || 5000;
+server.listen(PORT, () => {
+    console.log(`Server running on http://localhost:${PORT}`);
+});
+

@@ -19,13 +19,13 @@ const Login = () => {
       return;
     }
 
-    // Mock Authentication (replace with real API call)
-    if (email === "user@example.com" && password === "password123") {
-      // Redirect to the dashboard or home page upon successful login
-      navigate("/dashboard"); // Example: Redirect to Dashboard
-    } else {
-      setError("Invalid credentials, please try again.");
-    }
+    // // Mock Authentication (replace with real API call)
+    // if (email === "user@example.com" && password === "password123") {
+    //   // Redirect to the dashboard or home page upon successful login
+    //   navigate("/dashboard"); // Example: Redirect to Dashboard
+    // } else {
+    //   setError("Invalid credentials, please try again.");
+    // }
   };
 
   return (
