@@ -58,7 +58,14 @@ const app = express();
 
 const bodyParser = require('body-parser');
 app.use(bodyParser.json())
-
+const corsOptions = {
+    origin: 'http://localhost:3000',  // Allow requests from React app
+    methods: ['GET', 'POST', 'PUT', 'DELETE'], // Allow necessary HTTP methods
+    allowedHeaders: ['Content-Type', 'Authorization'], // Allow these headers
+  };
+  
+  app.use(cors(corsOptions));
+  
 
 const mongoURI = process.env.MONGO_URI ;
 
@@ -66,6 +73,22 @@ mongoose.connect(mongoURI)
   .then(() => console.log(`Connected to MongoDB ${mongoURI}`))
   .catch((err) => console.error('Error connecting to MongoDB:', err));
 
+  
+//Import the router file
+const { router, getLoggedInUsername } = require('./routes/user.routes');
+
+//Use the router
+app.use('/user', router);
+
+app.get('/current-username', (req, res) => {
+    const username = getLoggedInUsername(); // Call the function to get the logged-in username
+    console.log('Current logged-in username:', username);
+    if (username) {
+        res.json({ username });
+    } else {
+        res.status(404).json({ message: 'No user is logged in' });
+    }
+});
 
 // Create a terminal process
 const ptyProcess = pty.spawn(process.platform === 'win32' ? 'cmd.exe' : 'bash', [], {
@@ -216,11 +239,11 @@ async function generateFileTree(directory) {
   return tree
 }
 
-//Import the router file
-const userRoutes = require('./routes/user.routes');
+// //Import the router file
+// const userRoutes = require('./routes/user.routes');
 
-//Use the router
-app.use('/user', userRoutes);
+// //Use the router
+// app.use('/user', userRoutes);
 
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
