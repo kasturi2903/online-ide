@@ -2,7 +2,6 @@ const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 const UserModel = require('./models/UserModel');
 
-
 passport.use(new LocalStrategy(async(USERNAME, PASSWORD, done) => {
     try{
         // console.log('Received Credentials:', USERNAME, PASSWORD);
