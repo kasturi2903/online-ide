@@ -1,6 +1,9 @@
 # Use the official Node.js image as the base image
 FROM node:16-alpine
 
+# Install Python, make, and g++ for building native dependencies
+RUN apk add --no-cache python3 make g++
+
 # Set the working directory inside the container
 WORKDIR /app
 

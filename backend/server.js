@@ -66,7 +66,7 @@ const corsOptions = {
   
   app.use(cors(corsOptions));
   
-
+  let isInitialCommandExecuted = false;
 const mongoURI = process.env.MONGO_URI ;
 
 mongoose.connect(mongoURI)
@@ -124,6 +124,7 @@ const ptyProcess = pty.spawn(process.platform === 'win32' ? 'cmd.exe' : 'bash', 
 
     env: process.env
 });
+//ptyProcess.write(`cd ${latestUser} && echo "Shell ready"\r`);
 // const userDir = path.resolve(process.env.INIT_CWD || '.', 'user', latestUser);
 // fs.stat(userDir, (err, stats) => {
 //     if (err || !stats.isDirectory()) {
@@ -207,73 +208,31 @@ io.on('connection', (socket) => {
     
 
     // Handle terminal write event
+    // socket.on('terminal:write', (data) => {
+    //     ptyProcess.write(`cd ${latestUser} && echo "Shell ready"\r`);
+    //     console.log('Terminal input:', data);
+    //     if (data) {
+    //         ptyProcess.write(`${data}\r`); // Write input to the terminal process
+    //     }
+    // });
     socket.on('terminal:write', (data) => {
         console.log('Terminal input:', data);
+        
+        // Execute the initial "cd username && echo 'Shell ready'" command only once
+        if (!isInitialCommandExecuted) {
+            let c=`cd ${latestUser} && echo "Shell ready"\r`
+            console.log(c)
+            ptyProcess.write(`cd ${latestUser} && echo "Shell ready"\r`);
+            isInitialCommandExecuted = true; // Set the flag to true after the first execution
+        }
+
         if (data) {
             ptyProcess.write(`${data}\r`); // Write input to the terminal process
         }
     });
 });
 
-// app.get('/files', async (req, res) => {
-//     // const username = req.headers['username']; // Access the username from the headers
-//     // console.log(username)
-//     // if (!username) {
-//     //   return res.status(400).json({ error: 'Username is required' });
-//     // }
-//   const fileTree = await generateFileTree('./user');
-//   return res.json({ tree: fileTree })
-// })
-// const userSessions = {};
-// app.get('/files', async (req, res) => {
-//     const username = req.query.username; // Access the username from the query parameters
-//    // console.log(username)
-//     if (!username) {
-//       return res.status(400).json({ error: 'Username is required' });
-//     }
-//     userSessions[username] = { lastAccessed: new Date() }; // Store user-specific data
-//     //console.log('Current User Sessions:', userSessions);
 
-//     const userDirectory = path.join('./user', username); // Use the username to locate the directory
-//     const fileTree = await generateFileTree(userDirectory);
-//     return res.json({ tree: fileTree });
-//   });
-//   setInterval(() => {
-//     const usernames = Object.keys(userSessions);
-//     if (usernames.length === 0) {
-//         console.log('No active usernames.');
-//     } else {
-//         console.log('Active Usernames:', usernames.join(', '));
-//     }
-// }, 5000);
-
-// // app.get('/files/content', async (req, res) => {
-// //     const path = req.query.path;
-// //     const content = await fs.readFile(`./user${path}`, 'utf-8');
-// //     return res.json({ content });
-// // })
-// let latestUser = null; // Variable to store the latest user
-
-// app.get('/files', async (req, res) => {
-//     const username = req.query.username; // Access the username from the query parameters
-//     if (!username) {
-//         return res.status(400).json({ error: 'Username is required' });
-//     }
-//     latestUser = username; // Store only the latest username
-//    // console.log(`Latest user: ${latestUser}`); // Log the latest username
-//     const userDirectory = path.join('./user', latestUser); // Use the latest username to locate the directory
-//     const fileTree = await generateFileTree(userDirectory);
-//     return res.json({ tree: fileTree });
-// });
-
-// // Periodically log the latest username
-// // setInterval(() => {
-// //     if (latestUser) {
-// //         console.log('Latest Active Username:', latestUser);
-// //     } else {
-// //         console.log('No active username.');
-// //     }
-// // }, 5000);
 app.get('/files/content', async (req, res) => {
     const filePath = req.query.path;
     console.log(filePath)
