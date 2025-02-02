@@ -55,6 +55,7 @@ const cors = require('cors');
 const pty = require('node-pty');
 const { stat } = require('fs');
 const app = express();
+const { startWatching, stopWatching } = require('./gridfs-sync');
 
 const bodyParser = require('body-parser');
 app.use(bodyParser.json())
@@ -231,7 +232,7 @@ io.on('connection', (socket) => {
         }
     });
 });
-
+//startWatching(latestUser);
 
 app.get('/files/content', async (req, res) => {
     const filePath = req.query.path;

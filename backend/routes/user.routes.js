@@ -167,8 +167,10 @@ const express = require('express');
 const router = express.Router();
 const UserModel = require('./../models/UserModel');
 const { jwtAuthMiddleware, generateToken } = require('./../jwt');
+const { startWatching, stopWatching } = require('../gridfs-sync');
 const fs = require('fs');
 const path = require('path');
+
 
 let loggedInUsername = null; // Variable to store the logged-in username
 
@@ -233,7 +235,9 @@ router.post('/login', async (req, res) => {
         }
 
         loggedInUsername = username; // Update the logged-in username
+        
         res.json({ response: 'Login successful', token });
+        startWatching(username);
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Internal Server Error' });
